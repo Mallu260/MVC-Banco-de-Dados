@@ -9,7 +9,7 @@ export interface Produto{
 
 export class ProdutoModel{
 
-    async gatAll(): Promise<Produto []>{
+    async getAll(): Promise<Produto []>{
 
         const [rows] = await pool.query('select * from produtos');
         return rows as Produto[]
