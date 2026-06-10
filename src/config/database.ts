@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
-
+//CARREGAR AS VARIAVEIS DE AMBIENTE
 dotenv.config();
 
 const pool = mysql.createPool({
@@ -17,5 +17,3 @@ const pool = mysql.createPool({
 })
 
 export { pool }
-
-

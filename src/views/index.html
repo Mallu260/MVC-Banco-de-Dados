@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD de Produtos</title>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>Gerenciamento de Produtos</h1>
+
+  <h2>Criar Produto</h2>
+  <form id="createForm">
+    <label>Nome:</label>
+    <input type="text" id="nome" required>
+
+    <label>Preço:</label>
+    <input type="number" id="preco" step="0.01" required>
+
+    <button type="submit">Criar Produto</button>
+  </form>
+
+  <h2>Atualizar Produto</h2>
+  <form id="updateForm">
+    <label>ID:</label>
+    <input type="number" id="updateId" required>
+
+    <label>Nome:</label>
+    <input type="text" id="updateNome">
+
+    <label>Preço:</label>
+    <input type="number" id="updatePreco" step="0.01">
+
+    <button type="submit">Atualizar Produto</button>
+  </form>
+
+  <h2>Lista de Produtos</h2>
+  <button id="fetchProductsBtn">Carregar Produtos</button>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Preço</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="produtosTableBody"></tbody>
+  </table>
+</div>
+
+<script>
+const API_URL = 'http://localhost:3000/api/produtos';
+
+document
+  .getElementById('createForm')
+  .addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById('nome').value;
+    const preco = Number(document.getElementById('preco').value);
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nome, preco })
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      alert('Produto criado com sucesso!');
+      document.getElementById('createForm').reset();
+      loadProducts();
+
+    } catch (err) {
+      alert('Erro ao criar produto');
+      console.error(err);
+    }
+  });
+
+document
+  .getElementById('fetchProductsBtn')
+  .addEventListener('click', loadProducts);
+
+async function loadProducts() {
+  try {
+    const response = await fetch(API_URL);
+    const produtos = await response.json();
+
+    const tbody = document.getElementById('produtosTableBody');
+    tbody.innerHTML = '';
+
+    produtos.forEach(produto => {
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td>${produto.id}</td>
+        <td>${produto.nome}</td>
+        <td>${produto.preco}</td>
+        <td>
+          <button onclick="deleteProduct(${produto.id})">
+            Excluir
+          </button>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao carregar produtos');
+  }
+}
+
+document
+  .getElementById('updateForm')
+  .addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('updateId').value;
+    const nome = document.getElementById('updateNome').value;
+    const preco = Number(document.getElementById('updatePreco').value);
+
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nome, preco })
+      });
+
+      if (!response.ok) {
+        throw new Error();
+      }
+
+      alert('Produto atualizado com sucesso!');
+      document.getElementById('updateForm').reset();
+      loadProducts();
+
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao atualizar produto');
+    }
+  });
+
+async function deleteProduct(id) {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error();
+    }
+
+    alert('Produto excluído com sucesso!');
+    loadProducts();
+
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao excluir produto');
+  }
+}
+</script>
+
+</body>
+</html>
